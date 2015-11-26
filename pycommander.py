@@ -74,10 +74,9 @@ class MainWindow(QWidget):
         elif ev.timerId() == self._pitchTimer:
             self.pitch += (self.slPitch.value()/1000.0)**3 * 2000
 
-    @property
-    def step_size(self):
+    def step_size(self, large=False):
         modifiers = QApplication.keyboardModifiers()
-        if modifiers == Qt.ShiftModifier:
+        if large || (modifiers & Qt.ShiftModifier):
             return 100
         else:
             return 1
@@ -104,6 +103,34 @@ class MainWindow(QWidget):
         self.lcdYaw.display(int(value))
 
     # ====== SLOTS ======
+    @pyqtSlot(int)
+    def on_slYaw_actionTriggered(self, action):
+        if action == QSlider.SliderMove:
+            return
+        elif action == QSlider.SliderSingleStepAdd:
+            self.yaw += self.step_size()
+        elif action == QSlider.SliderSingleStepSub:
+            self.yaw -= self.step_size()
+        elif action == QSlider.SliderPageStepAdd:
+            self.yaw += self.step_size(True)
+        elif action == QSlider.SliderPageStepSub:
+            self.yaw -= self.step_size(True)
+        self.slYaw.setValue(0)
+
+    @pyqtSlot(int)
+    def on_slPitch_actionTriggered(self, action):
+        if action == QSlider.SliderMove:
+            return
+        elif action == QSlider.SliderSingleStepAdd:
+            self.pitch += self.step_size()
+        elif action == QSlider.SliderSingleStepSub:
+            self.pitch -= self.step_size()
+        elif action == QSlider.SliderPageStepAdd:
+            self.pitch += self.step_size(True)
+        elif action == QSlider.SliderPageStepSub:
+            self.pitch -= self.step_size(True)
+        self.slPitch.setValue(0)
+
     @pyqtSlot()
     def on_slYaw_sliderPressed(self):
         if not self._yawTimer:
@@ -128,19 +155,20 @@ class MainWindow(QWidget):
 
     @pyqtSlot()
     def on_btnYawInc_clicked(self):
-        self.yaw += self.step_size
+        self.yaw += self.step_size()
 
     @pyqtSlot()
     def on_btnYawDec_clicked(self):
-        self.yaw -= self.step_size
+        self.yaw -= self.step_size()
 
     @pyqtSlot()
     def on_btnPitchInc_clicked(self):
-        self.pitch += self.step_size
+        self.pitch += self.step_size()
 
     @pyqtSlot()
     def on_btnPitchDec_clicked(self):
-        self.pitch -= self.step_size
+        self.pitch -= self.step_size()
+
 
 if __name__ == '__main__':
     qApp = QApplication(sys.argv)
