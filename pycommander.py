@@ -11,6 +11,24 @@ except ImportError:
     print 'Could not find epics module -- running in demo mode, this is probably not what you want!'
     from dummyepics import PV
 
+class KeyFilter(QObject):
+    upKeyPressed = pyqtSignal()
+    downKeyPressed = pyqtSignal()
+    leftKeyPressed = pyqtSignal()
+    rightKeyPressed = pyqtSignal()
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Up:
+                self.upKeyPressed.emit(); return True
+            elif event.key() == Qt.Key_Down:
+                self.downKeyPressed.emit(); return True
+            elif event.key() == Qt.Key_Right:
+                self.rightKeyPressed.emit(); return True
+            elif event.key() == Qt.Key_Left:
+                self.leftKeyPressed.emit(); return True
+        return False
+
 class MainWindow(QMainWindow):
     def __init__(self, options):
         super(MainWindow, self).__init__()
@@ -30,8 +48,9 @@ class MainWindow(QMainWindow):
         self._pitch = 0
         self._yawTimer = None
         self._pitchTimer = None
-        self.initialise_PVs()
 
+        self.install_filter()
+        self.initialise_PVs()
         self.statusbar.showMessage('Use sliders or arrow keys to adjust pitch/yaw, press shift for larger steps.')
 
     @property
@@ -79,23 +98,19 @@ class MainWindow(QMainWindow):
         self.lcdPitch.display('---')
         self.lcdYaw.display('---')
 
+    def install_filter(self):
+        self._event_filter = KeyFilter()
+        QApplication.instance().installEventFilter(self._event_filter)
+        self._event_filter.upKeyPressed.connect(self.on_btnPitchInc_clicked)
+        self._event_filter.downKeyPressed.connect(self.on_btnPitchDec_clicked)
+        self._event_filter.rightKeyPressed.connect(self.on_btnYawInc_clicked)
+        self._event_filter.leftKeyPressed.connect(self.on_btnYawDec_clicked)
+
     def timerEvent(self, ev):
         if ev.timerId() == self._yawTimer:
             self.yaw += (self.slYaw.value()/1000.0)**3 * 2000
         elif ev.timerId() == self._pitchTimer:
             self.pitch += (self.slPitch.value()/1000.0)**3 * 2000
-
-    def event(self, event):
-        if event.type() == QEvent.KeyPress:
-            if event.key() == Qt.Key_Up:
-                self.pitch += self.step_size(); return True
-            elif event.key() == Qt.Key_Down:
-                self.pitch -= self.step_size(); return True
-            elif event.key() == Qt.Key_Right:
-                self.yaw += self.step_size(); return True
-            elif event.key() == Qt.Key_Left:
-                self.yaw -= self.step_size(); return True
-        return super(MainWindow, self).event(event)
 
     def step_size(self, large=False):
         modifiers = QApplication.keyboardModifiers()
