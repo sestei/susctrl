@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
 
         self.install_filter()
         self.initialise_PVs()
-        self.statusbar.showMessage('Use sliders or arrow keys to adjust pitch/yaw, press shift for larger steps.')
+        self.statusbar.showMessage('Sliders or arrow keys adjust pitch/yaw, press shift for larger steps.')
 
     @property
     def yaw(self):
