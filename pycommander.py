@@ -21,6 +21,11 @@ class MainWindow(QWidget):
         else:
             print 'Please provide a suspension name via the -s/--suspension command line parameter.'
             exit(1)
+        if options['demo']:
+            self._demo = True
+            print 'Running in demo mode.'
+        else:
+            self._demo = False
         self._yaw = 0
         self._pitch = 0
         self._yawTimer = None
@@ -52,14 +57,18 @@ class MainWindow(QWidget):
         self._PV_pitch.value = int(self._pitch)
 
     def initialise_PVs(self):
-        self._PV_yaw = PV(
+        myPV = PV
+        if self._demo:
+            import dummyepics
+            myPV = dummyepics.PV
+        self._PV_yaw = myPV(
             'G2:SUS-{0}_YAW_OFFSET'.format(self._suspension),
             connection_timeout=1.0,
             connection_callback=self.on_PV_yaw_connected,
             callback=self.on_PV_yaw_changed
         )
         
-        self._PV_pitch = PV(
+        self._PV_pitch = myPV(
             'G2:SUS-{0}_PITCH_OFFSET'.format(self._suspension),
             connection_timeout=1.0,
             connection_callback=self.on_PV_pitch_connected,
@@ -76,7 +85,7 @@ class MainWindow(QWidget):
 
     def step_size(self, large=False):
         modifiers = QApplication.keyboardModifiers()
-        if large || (modifiers & Qt.ShiftModifier):
+        if large or (modifiers & Qt.ShiftModifier):
             return 100
         else:
             return 1
@@ -107,28 +116,28 @@ class MainWindow(QWidget):
     def on_slYaw_actionTriggered(self, action):
         if action == QSlider.SliderMove:
             return
-        elif action == QSlider.SliderSingleStepAdd:
-            self.yaw += self.step_size()
-        elif action == QSlider.SliderSingleStepSub:
-            self.yaw -= self.step_size()
-        elif action == QSlider.SliderPageStepAdd:
-            self.yaw += self.step_size(True)
-        elif action == QSlider.SliderPageStepSub:
-            self.yaw -= self.step_size(True)
+        #elif action == QSlider.SliderSingleStepAdd:
+        #    self.yaw += self.step_size()
+        #elif action == QSlider.SliderSingleStepSub:
+        #    self.yaw -= self.step_size()
+        #elif action == QSlider.SliderPageStepAdd:
+        #    self.yaw += self.step_size()
+        #elif action == QSlider.SliderPageStepSub:
+        #    self.yaw -= self.step_size()
         self.slYaw.setValue(0)
 
     @pyqtSlot(int)
     def on_slPitch_actionTriggered(self, action):
         if action == QSlider.SliderMove:
             return
-        elif action == QSlider.SliderSingleStepAdd:
-            self.pitch += self.step_size()
-        elif action == QSlider.SliderSingleStepSub:
-            self.pitch -= self.step_size()
-        elif action == QSlider.SliderPageStepAdd:
-            self.pitch += self.step_size(True)
-        elif action == QSlider.SliderPageStepSub:
-            self.pitch -= self.step_size(True)
+        #elif action == QSlider.SliderSingleStepAdd:
+        #    self.pitch += self.step_size()
+        #elif action == QSlider.SliderSingleStepSub:
+        #    self.pitch -= self.step_size()
+        #elif action == QSlider.SliderPageStepAdd:
+        #    self.pitch += self.step_size(True)
+        #elif action == QSlider.SliderPageStepSub:
+        #    self.pitch -= self.step_size(True)
         self.slPitch.setValue(0)
 
     @pyqtSlot()
@@ -175,6 +184,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(prog='pycommander.py')
     parser.add_argument('-s', '--suspension', help='display controls for SUSPENSION')
+    parser.add_argument('-d', '--demo', help='enter demo mode', action='store_true')
     args = parser.parse_args()
     window = MainWindow(vars(args))
     window.show()
