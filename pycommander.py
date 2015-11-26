@@ -52,12 +52,19 @@ class MainWindow(QWidget):
         self._PV_pitch.value = int(self._pitch)
 
     def initialise_PVs(self):
-        self._PV_yaw = PV('G2:SUS-{0}_YAW_OFFSET'.format(self._suspension))
-        idx = self._PV_yaw.add_callback(self.on_PV_yaw_changed)
-        self._PV_yaw.run_callback(idx)
-        self._PV_pitch = PV('G2:SUS-{0}_PITCH_OFFSET'.format(self._suspension))
-        idx = self._PV_pitch.add_callback(self.on_PV_pitch_changed)
-        self._PV_pitch.run_callback(idx)
+        self._PV_yaw = PV(
+            'G2:SUS-{0}_YAW_OFFSET'.format(self._suspension),
+            connection_timeout=1.0,
+            connection_callback=self.on_PV_yaw_connected
+        )
+        
+        self._PV_pitch = PV(
+            'G2:SUS-{0}_PITCH_OFFSET'.format(self._suspension),
+            connection_timeout=1.0,
+            connection_callback=self.on_PV_pitch_connected
+        )
+        self.lcdPitch.display('---')
+        self.lcdYaw.display('---')
 
     def timerEvent(self, ev):
         if ev.timerId() == self._yawTimer:
@@ -74,6 +81,24 @@ class MainWindow(QWidget):
             return 1
 
     # ====== PV callbacks ======
+    def on_PV_pitch_connected(self, pvname, conn):
+        if conn == False:
+            return
+        idx = self._PV_pitch.add_callback(self.on_PV_pitch_changed)
+        self._PV_pitch.run_callback(idx)
+        self.slPitch.setEnabled(True)
+        self.btnPitchInc.setEnabled(True)
+        self.btnPitchDec.setEnabled(True)
+
+    def on_PV_yaw_connected(self, pvname, conn):
+        if conn == False:
+            return
+        idx = self._PV_yaw.add_callback(self.on_PV_yaw_changed)
+        self._PV_yaw.run_callback(idx)
+        self.slYaw.setEnabled(True)
+        self.btnYawInc.setEnabled(True)
+        self.btnYawDec.setEnabled(True)
+
     def on_PV_pitch_changed(self, value, **kw):
         self.lcdPitch.display(int(value))
     
