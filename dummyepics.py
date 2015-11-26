@@ -2,12 +2,13 @@
 from PyQt4.QtCore import QTimer
 
 class PV(object):
-    def __init__(self, pvname, value=0.0, connection_timeout=0.0, connection_callback=None):
+    def __init__(self, pvname, value=0.0, connection_timeout=0.0, connection_callback=None, callback=None):
         self._pvname = pvname
         self._value = value
-        self._callback = None
+        self._callback = callback
         self._connection_callback = connection_callback
         QTimer.singleShot(1000, self.run_connection_callback)
+        QTimer.singleShot(1010, self.run_callback)
 
     @property
     def value(self):
