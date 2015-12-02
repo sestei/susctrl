@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import argparse
+import os.path
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import uic
@@ -32,7 +33,7 @@ class KeyFilter(QObject):
 class MainWindow(QMainWindow):
     def __init__(self, options):
         super(MainWindow, self).__init__()
-        uic.loadUi('pycommander.ui', self)
+        uic.loadUi(os.path.dirname(__file__)+'/pycommander.ui', self)
         if options['suspension']:
             self._suspension = options['suspension']
             self.lblTheSuspension.setText(self._suspension)
