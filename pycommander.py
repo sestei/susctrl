@@ -83,14 +83,14 @@ class MainWindow(QMainWindow):
             import dummyepics
             myPV = dummyepics.PV
         self._PV_yaw = myPV(
-            'G2:SUS-{0}_YAW_OFFSET'.format(self._suspension),
+            'G2:SUS-{0}_YAW_FILT_OFFSET'.format(self._suspension),
             connection_timeout=1.0,
             connection_callback=self.on_PV_yaw_connected,
             callback=self.on_PV_yaw_changed
         )
         
         self._PV_pitch = myPV(
-            'G2:SUS-{0}_PITCH_OFFSET'.format(self._suspension),
+            'G2:SUS-{0}_PITCH_FILT_OFFSET'.format(self._suspension),
             connection_timeout=1.0,
             connection_callback=self.on_PV_pitch_connected,
             callback=self.on_PV_pitch_changed
