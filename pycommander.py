@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
     def on_PV_pitch_connected(self, conn, **kw):
         if conn == False:
             return
+        self._pitch = self._PV_pitch.value
         self.slPitch.setEnabled(True)
         self.btnPitchInc.setEnabled(True)
         self.btnPitchDec.setEnabled(True)
@@ -130,14 +131,17 @@ class MainWindow(QMainWindow):
     def on_PV_yaw_connected(self, conn, **kw):
         if conn == False:
             return
+        self._yaw = self._PV_yaw.value
         self.slYaw.setEnabled(True)
         self.btnYawInc.setEnabled(True)
         self.btnYawDec.setEnabled(True)
 
     def on_PV_pitch_changed(self, value, **kw):
+        self._pitch = value
         self.lcdPitch.display(int(value))
     
     def on_PV_yaw_changed(self, value, **kw):
+        self._yaw = value
         self.lcdYaw.display(int(value))
 
     # ====== SLOTS ======
